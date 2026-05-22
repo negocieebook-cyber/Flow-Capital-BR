@@ -1,0 +1,66 @@
+Bancos:
+  - ITUB4
+  - BBAS3
+  - BBDC4
+  - SANB11
+  - BPAC11
+
+Petróleo e Gás:
+  - PETR4
+  - PETR3
+  - PRIO3
+  - RECV3
+  - RRRP3
+
+Mineração e Siderurgia:
+  - VALE3
+  - GGBR4
+  - CSNA3
+  - USIM5
+  - CMIN3
+
+Energia Elétrica:
+  - ELET3
+  - ELET6
+  - EGIE3
+  - TAEE11
+  - CPFE3
+  - ENEV3
+
+Varejo e Consumo:
+  - LREN3
+  - VIVA3
+  - MGLU3
+  - ASAI3
+  - GMAT3
+  - SOMA3
+
+Saúde:
+  - RADL3
+  - HAPV3
+  - RDOR3
+  - FLRY3
+
+Construção e Imobiliário:
+  - CYRE3
+  - MRVE3
+  - DIRR3
+  - EZTC3
+  - MULT3
+  - IGTI11
+
+Papel e Celulose:
+  - SUZB3
+  - KLBN11
+
+Agro e Alimentos:
+  - JBSS3
+  - BRFS3
+  - BEEF3
+  - SLCE3
+  - SMTO3
+
+Tecnologia e Serviços Digitais:
+  - TOTS3
+  - LWSA3
+  - CASH3

@@ -1,0 +1,32 @@
+user:
+  name: "Barbara"
+
+telegram:
+  enabled: true
+  chat_id: "PREENCHER_COM_TELEGRAM_CHAT_ID"
+
+market:
+  country: "BR"
+  benchmark: "BOVA11"
+  currency: "BRL"
+
+report:
+  frequency: "weekly"
+  send_day: "saturday"
+  send_time_local: "08:00"
+  timezone: "America/Sao_Paulo"
+  lookback_weeks: 12
+  volume_baseline_weeks: 8
+  rrg_tail_weeks: 7
+  unusual_volume_threshold: 1.5
+  leader_score_threshold: 60
+  strong_score_threshold: 70
+  weak_score_threshold: 40
+
+features:
+  include_sector_rrg: true
+  include_stock_rrg_for_leaders: true
+  include_unusual_volume: true
+  include_macro_context: true
+  include_telegram_delivery: true
+  include_two_layer_analysis: true
