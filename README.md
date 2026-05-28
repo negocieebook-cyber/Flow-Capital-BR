@@ -54,14 +54,14 @@ python -m playwright install chromium
 2. Envie `/newbot`.
 3. Escolha nome e usuário do bot.
 4. Copie o `TELEGRAM_BOT_TOKEN`.
-5. Envie uma mensagem qualquer para o seu bot.
-6. Para descobrir o `TELEGRAM_CHAT_ID`, acesse no navegador:
+5. Cada pessoa que vai receber o relatório precisa enviar uma mensagem qualquer para o seu bot.
+6. Para descobrir o `TELEGRAM_CHAT_ID` de cada pessoa, acesse no navegador:
 
 ```text
 https://api.telegram.org/botSEU_TOKEN/getUpdates
 ```
 
-Procure pelo campo `chat` e copie o `id`.
+Procure pelo campo `chat` e copie o `id`. Para enviar para mais de uma pessoa, use `TELEGRAM_CHAT_IDS` com os IDs separados por vírgula.
 
 ## Preencher .env
 
@@ -71,6 +71,7 @@ Crie um arquivo `.env` a partir de `.env.example`:
 BRAPI_TOKEN=
 TELEGRAM_BOT_TOKEN=seu_token_aqui
 TELEGRAM_CHAT_ID=seu_chat_id_aqui
+TELEGRAM_CHAT_IDS=primeiro_chat_id,segundo_chat_id
 DATABASE_URL=sqlite:///data/flow_map_brasil.db
 ```
 
@@ -116,17 +117,18 @@ O PDF será salvo em `reports/flow_map_brasil_YYYY-MM-DD.pdf`.
 
 ## Ativar Agendador de Tarefas
 
-Os scripts usam o caminho padrão `C:\flow-map-brasil`.
-
-Se o projeto estiver em outra pasta, edite:
-
-- `app\scheduler\run_weekly_report.bat`
-- `app\scheduler\create_windows_task.ps1`
+Os scripts detectam automaticamente a pasta do projeto a partir de `app\scheduler`.
 
 Depois abra o PowerShell como administrador e rode:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File app\scheduler\create_windows_task.ps1
+```
+
+Se preferir criar a tarefa pelo Prompt de Comando, rode como administrador:
+
+```cmd
+app\scheduler\create_windows_task.cmd
 ```
 
 A tarefa será criada para rodar todo sábado às 08:00.

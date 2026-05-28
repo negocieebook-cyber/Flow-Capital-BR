@@ -13,32 +13,43 @@ def _token() -> str:
     return token
 
 
-def _chat_id() -> str:
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    if not chat_id:
-        raise RuntimeError("TELEGRAM_CHAT_ID nao configurado no .env")
-    return chat_id
+def _chat_ids() -> list[str]:
+    raw_chat_ids = os.getenv("TELEGRAM_CHAT_IDS") or os.getenv("TELEGRAM_CHAT_ID")
+    if not raw_chat_ids:
+        raise RuntimeError("TELEGRAM_CHAT_ID ou TELEGRAM_CHAT_IDS nao configurado no .env")
+    chat_ids = [chat_id.strip() for chat_id in raw_chat_ids.split(",") if chat_id.strip()]
+    if not chat_ids:
+        raise RuntimeError("Nenhum chat_id valido configurado no .env")
+    return chat_ids
 
 
 def send_telegram_message(text: str) -> None:
     url = f"https://api.telegram.org/bot{_token()}/sendMessage"
-    response = requests.post(url, data={"chat_id": _chat_id(), "text": text}, timeout=30)
-    if not response.ok:
-        raise RuntimeError(f"Falha Telegram sendMessage: HTTP {response.status_code} - {response.text}")
+    failures = []
+    for chat_id in _chat_ids():
+        response = requests.post(url, data={"chat_id": chat_id, "text": text}, timeout=30)
+        if not response.ok:
+            failures.append(f"{chat_id}: HTTP {response.status_code} - {response.text}")
+    if failures:
+        raise RuntimeError(f"Falha Telegram sendMessage: {'; '.join(failures)}")
 
 
 def send_telegram_document(file_path: str, caption: str) -> None:
     url = f"https://api.telegram.org/bot{_token()}/sendDocument"
     path = Path(file_path)
-    with path.open("rb") as file:
-        response = requests.post(
-            url,
-            data={"chat_id": _chat_id(), "caption": caption},
-            files={"document": (path.name, file, "application/pdf")},
-            timeout=60,
-        )
-    if not response.ok:
-        raise RuntimeError(f"Falha Telegram sendDocument: HTTP {response.status_code} - {response.text}")
+    failures = []
+    for chat_id in _chat_ids():
+        with path.open("rb") as file:
+            response = requests.post(
+                url,
+                data={"chat_id": chat_id, "caption": caption},
+                files={"document": (path.name, file, "application/pdf")},
+                timeout=60,
+            )
+        if not response.ok:
+            failures.append(f"{chat_id}: HTTP {response.status_code} - {response.text}")
+    if failures:
+        raise RuntimeError(f"Falha Telegram sendDocument: {'; '.join(failures)}")
 
 
 def test_telegram_connection() -> None:

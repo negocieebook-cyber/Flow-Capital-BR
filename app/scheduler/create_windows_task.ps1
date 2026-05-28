@@ -1,6 +1,7 @@
 $TaskName = "Flow Map Brasil - Relatorio Semanal"
-$ProjectPath = "C:\flow-map-brasil"
-$BatPath = "$ProjectPath\app\scheduler\run_weekly_report.bat"
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectPath = Resolve-Path (Join-Path $ScriptDir "..\..")
+$BatPath = Join-Path $ScriptDir "run_weekly_report.bat"
 
 $Action = New-ScheduledTaskAction -Execute $BatPath
 $Trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Saturday -At 8:00AM
