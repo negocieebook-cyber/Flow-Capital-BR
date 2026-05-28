@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Flow Map Brasil — {{ week_date }}</title>
+  <style>{{ styles_inline | safe }}</style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       CAPA
+  ════════════════════════════════════════════════ -->
+  <section class="cover">
+    <div class="cover-header">
+      <div class="cover-brand">
+        <h1>Flow Map Brasil</h1>
+        <div class="cover-subtitle">Rotação Setorial — Ibovespa</div>
+      </div>
+      <div class="cover-meta">
+        <div>Semana de referência: <strong>{{ week_date }}</strong></div>
+        <div>Gerado em: {{ generated_at }}</div>
+        <div>Benchmark: <strong>{{ benchmark }}</strong></div>
+      </div>
+    </div>
+    <p class="cover-summary">{{ executive_summary }}</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       MARKET FLOW GAUGE
+  ════════════════════════════════════════════════ -->
+  <section>
+    <h2>Market Flow Gauge</h2>
+    <div class="gauge-grid">
+      {% for card in gauge_cards %}
+      <div class="gauge-card{% if card.accent %} accent-{{ card.accent }}{% endif %}">
+        <div class="gauge-label">{{ card.label }}</div>
+        <div class="gauge-value">{{ card.value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       LEITURA ESTRATÉGICA DA SEMANA
+  ════════════════════════════════════════════════ -->
+  <section class="strategic-reading">
+    <h2>Leitura Estratégica da Semana</h2>
+
+    <div class="strategic-block acionavel">
+      <div class="strategic-label">✅ Acionável agora</div>
+      <p>{{ strategic_reading.acionavel }}</p>
+    </div>
+
+    <div class="strategic-block radar">
+      <div class="strategic-label">🔍 No radar</div>
+      <p>{{ strategic_reading.radar }}</p>
+    </div>
+
+    <div class="strategic-block evitar">
+      <div class="strategic-label">⚠️ Evitar esta semana</div>
+      <p>{{ strategic_reading.evitar }}</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTOR ROTATION MAP — RRG
+  ════════════════════════════════════════════════ -->
+  <section class="page-break">
+    <h2>Sector Rotation Map — RRG Setorial</h2>
+    {% if sector_rrg_path %}
+    <img class="chart chart-full" src="{{ sector_rrg_path }}" alt="RRG setorial">
+    <p class="chart-caption">
+      <strong>Leading</strong>: RS Ratio ≥ 100 e RS Momentum ≥ 100 &nbsp;|&nbsp;
+      <strong>Improving</strong>: momentum positivo, ainda sem liderança plena &nbsp;|&nbsp;
+      <strong>Weakening</strong>: perdendo momentum &nbsp;|&nbsp;
+      <strong>Lagging</strong>: fraqueza relativa
+    </p>
+    {% else %}
+    <p class="empty-state">Gráfico RRG não disponível (histórico insuficiente para a semana).</p>
+    {% endif %}
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       RANKING DE SETORES
+  ════════════════════════════════════════════════ -->
+  <section>
+    <h2>Ranking de Setores</h2>
+
+    {% if sector_ranking_chart_path %}
+    <img class="chart chart-half" src="{{ sector_ranking_chart_path }}" alt="Ranking de setores">
+    {% endif %}
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:3%">#</th>
+          <th style="width:20%">Setor</th>
+          <th style="width:8%">Score</th>
+          <th style="width:13%">Status</th>
+          <th style="width:7%">Var.</th>
+          <th style="width:8%">Ret.Rel.</th>
+          <th style="width:8%">RS Ratio</th>
+          <th style="width:8%">RS Mom.</th>
+          <th style="width:7%">Vol.</th>
+          <th style="width:8%">Conf.</th>
+          <th style="width:10%">Quadrante</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in sector_rows %}
+        <tr>
+          <td><strong>{{ row.rank }}</strong></td>
+          <td><strong>{{ row.sector }}</strong></td>
+          <td><span class="badge score-{{ row.score_class }}">{{ row.score }}</span></td>
+          <td class="text-{{ row.score_class }}">{{ row.score_status }}</td>
+          <td class="{% if row.score_delta != 'n/d' %}{% if '-' in row.score_delta %}delta-neg{% else %}delta-pos{% endif %}{% else %}delta-neu{% endif %}">{{ row.score_delta }}</td>
+          <td class="{{ row.rel_return_class }}">{{ row.relative_return }}</td>
+          <td>{{ row.rs_ratio }}</td>
+          <td>{{ row.rs_momentum }}</td>
+          <td>{{ row.volume_relative }}</td>
+          <td>{{ row.internal_confirmation }}</td>
+          <td><span class="badge quadrant-{{ row.quadrant_class }}">{{ row.quadrant }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       VARIAÇÕES DE SCORE
+  ════════════════════════════════════════════════ -->
+  <section>
+    <h2>Variações de Score na Semana</h2>
+    <div class="two-col">
+      <div>
+        <h3 class="text-positive">▲ Maiores altas de score</h3>
+        <ul>
+          {% for item in top_score_gainers %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-negative">▼ Maiores quedas de score</h3>
+        <ul>
+          {% for item in top_score_losers %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       NARRATIVA SETORIAL
+  ════════════════════════════════════════════════ -->
+  <section>
+    <h2>Narrativa Setorial</h2>
+    {% if no_strong_narrative %}
+    <div class="box-warning">{{ no_strong_narrative }}</div>
+    {% endif %}
+    <div class="narrative-block{% if not has_score_leaders %} no-leader{% endif %}">
+      {{ main_narrative }}
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       AÇÕES QUE EXPLICAM OS SETORES LÍDERES
+  ════════════════════════════════════════════════ -->
+  <section class="page-break">
+    <h2>Ações que Explicam os Setores Líderes</h2>
+
+    {% if leadership_note %}
+    <div class="box-info">{{ leadership_note }} Estão listados os setores em melhor posição relativa para monitoramento.</div>
+    {% endif %}
+
+    {% for sector in leader_sections %}
+    <div class="sector-block">
+      <div class="sector-block-header">
+        <h3>{{ sector.sector }}</h3>
+        {% if not sector.is_leader %}
+        <span class="badge score-watchable">monitoramento</span>
+        {% else %}
+        <span class="badge score-{{ sector.score_class }}">{{ sector.score_status }}</span>
+        {% endif %}
+      </div>
+      <p class="sector-narrative">{{ sector.narrative }}</p>
+      <table class="compact">
+        <thead>
+          <tr>
+            <th style="width:10%">Ticker</th>
+            <th style="width:9%">Ret.Sem.</th>
+            <th style="width:9%">Ret.Rel.</th>
+            <th style="width:8%">RS Ratio</th>
+            <th style="width:8%">RS Mom.</th>
+            <th style="width:7%">Vol.</th>
+            <th style="width:7%">Score</th>
+            <th style="width:14%">Tape</th>
+            <th>Leitura</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in sector.rows %}
+          <tr{% if row.tape_signal == "Accumulation Confirmed" %} class="acc-confirmed"{% endif %}>
+            <td><strong>{{ row.ticker }}</strong></td>
+            <td class="{{ row.weekly_return_class }}">{{ row.weekly_return }}</td>
+            <td class="{{ row.rel_return_class }}">{{ row.relative_return }}</td>
+            <td>{{ row.rs_ratio }}</td>
+            <td>{{ row.rs_momentum }}</td>
+            <td>{{ row.volume_relative }}</td>
+            <td><span class="badge score-{{ row.score_class }}">{{ row.score }}</span></td>
+            <td><span class="badge {{ row.tape_signal_class }}">{% if row.tape_signal == "Accumulation Confirmed" %}★ {% endif %}{{ row.tape_signal }}</span></td>
+            <td class="reading-cell">{{ row.individual_reading }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty-state">Nenhum setor atingiu score mínimo de liderança nesta semana. Listando os melhores para monitoramento.</p>
+    {% endfor %}
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       RRG DE AÇÕES DOS SETORES LÍDERES
+  ════════════════════════════════════════════════ -->
+  {% if has_stock_rrg %}
+  <section class="page-break">
+    <h2>RRG de Ações dos Setores Líderes</h2>
+    {% for path in stock_rrg_paths %}
+    <img class="chart chart-half" src="{{ path }}" alt="RRG de ações">
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <!-- ═══════════════════════════════════════════════
+       AÇÕES COM VOLUME INCOMUM
+  ════════════════════════════════════════════════ -->
+  <section>
+    <h2>Ações com Volume Incomum</h2>
+
+    {% if has_unusual_volume %}
+      {% if unusual_volume_chart_path %}
+      <img class="chart chart-half" src="{{ unusual_volume_chart_path }}" alt="Volume incomum">
+      {% endif %}
+      <div class="two-col">
+        <div>
+          <h3 class="text-positive">▲ Volume incomum positivo</h3>
+          {{ unusual_positive_table | safe }}
+        </div>
+        <div>
+          <h3 class="text-negative">▼ Volume incomum negativo</h3>
+          {{ unusual_negative_table | safe }}
+        </div>
+      </div>
+    {% else %}
+    <p class="empty-state">Nenhuma ação superou 1.5× a média de volume das últimas 8 semanas nesta semana.</p>
+    {% endif %}
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       MACRO BRASIL
+  ════════════════════════════════════════════════ -->
+  <section>
+    <h2>Macro Brasil</h2>
+    {% if macro_indicators %}
+    <div class="macro-grid">
+      {% for ind in macro_indicators %}
+      <div class="macro-card">
+        <div class="macro-label">{{ ind.label }}</div>
+        <div class="macro-value {{ ind.direction_class }}">{{ ind.value }}</div>
+        {% if ind.note %}<div class="macro-note">{{ ind.note }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">{{ macro_text }}</p>
+    {% endif %}
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       LISTA DE OBSERVAÇÃO — PRÓXIMA SEMANA
+  ════════════════════════════════════════════════ -->
+  <section>
+    <h2>Lista de Observação — Próxima Semana</h2>
+    <ul class="watchlist">
+      {% for item in watchlist %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       QUALIDADE DOS DADOS
+  ════════════════════════════════════════════════ -->
+  <section>
+    <h2>Qualidade dos Dados</h2>
+    {% set real_warnings = data_warnings | reject("equalto", "Nenhum aviso relevante de dados.") | list %}
+    {% if real_warnings %}
+    <div class="box-warning">
+      <strong>Avisos de dados:</strong>
+      <ul>
+        {% for item in real_warnings %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    <table class="quality-table">
+      <tbody>
+        {% for row in quality_rows %}
+        <tr><th>{{ row.label }}</th><td>{{ row.value }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       DISCLAIMER
+  ════════════════════════════════════════════════ -->
+  <footer class="disclaimer">
+    <strong>Disclaimer:</strong> Este relatório tem finalidade educacional e informativa. Não constitui recomendação de investimento, oferta de compra ou venda de ativos, nem substitui análise individual de risco. Dados podem conter atrasos, falhas ou inconsistências dependendo das fontes utilizadas.
+  </footer>
+
+</body>
+</html>
