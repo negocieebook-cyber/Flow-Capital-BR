@@ -1,0 +1,58 @@
+name: Flow Capital BR - Weekly Report
+
+on:
+  schedule:
+    # Sábado às 08:00 BRT (= 11:00 UTC)
+    - cron: '0 11 * * 6'
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Restore database from previous run
+        uses: actions/cache@v4
+        with:
+          path: data/flow_map_brasil.db
+          key: flow-capital-db-${{ github.run_id }}
+          restore-keys: |
+            flow-capital-db-
+
+      - name: Initialize database (se não existir)
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CHAT_IDS: ${{ secrets.TELEGRAM_CHAT_IDS }}
+          DATABASE_URL: sqlite:///data/flow_map_brasil.db
+        run: python -m app.main --mode init-db
+
+      - name: Run weekly report
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CHAT_IDS: ${{ secrets.TELEGRAM_CHAT_IDS }}
+          DATABASE_URL: sqlite:///data/flow_map_brasil.db
+        run: python -m app.main --mode weekly
+
+      - name: Save database for next run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-${{ github.run_id }}
+          path: data/flow_map_brasil.db
+          retention-days: 90
